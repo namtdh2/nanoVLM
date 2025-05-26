@@ -24,3 +24,6 @@ uv.lock
 checkpoints/
 notebooks/
 *.slurm
+
+# project specific
+playground/
