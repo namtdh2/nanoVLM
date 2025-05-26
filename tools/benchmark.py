@@ -158,7 +158,7 @@ def print_results(results):
 def main():
     # Configuration
     checkpoint_path = "checkpoints/nanoVLM-sample/"
-    dataset_path = "playground/windoor_dataset"
+    dataset_path = "playground/test_windoor_dataset"
     
     # Load model and dataset
     print("Loading model and dataset...")
