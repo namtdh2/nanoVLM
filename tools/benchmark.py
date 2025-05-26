@@ -63,6 +63,7 @@ def evaluate_model(model, dataset, tokenizer, device):
             
             # Prepare text input
             text_data = sample['text_data']
+            print("text_data", text_data)
             encoded = tokenizer.batch_encode_plus([text_data], return_tensors="pt")
             tokens = encoded["input_ids"].to(device)
             
