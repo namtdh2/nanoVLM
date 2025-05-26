@@ -13,27 +13,35 @@ sys.path.append(str(Path(__file__).parent.parent))
 from data.datasets import VQADataset
 from data.collators import VQACollator
 from models.vision_language_model import VisionLanguageModel
+from data.processors import get_tokenizer, get_image_processor
 import models.config as cfg
 
 def load_model_and_dataset(checkpoint_path, dataset_path):
+    # Set device
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    print(f"Using device: {device}")
+
+    # Load model
+    print(f"Loading weights from: {checkpoint_path}")
+    model = VisionLanguageModel.from_pretrained(checkpoint_path).to(device)
+    model.eval()
+
     # Initialize tokenizer and image processor
-    tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/cosmo2-tokenizer")
-    image_processor = AutoImageProcessor.from_pretrained("google/siglip-base-patch16-224")
+    tokenizer = get_tokenizer(model.cfg.lm_tokenizer)
+    image_processor = get_image_processor(model.cfg.vit_img_size)
     
     # Load dataset
     dataset = load_from_disk(dataset_path)
     vqa_dataset = VQADataset(dataset['train'], tokenizer, image_processor)
     
-    # Initialize and load model using from_pretrained
-    model = VisionLanguageModel.from_pretrained(checkpoint_path)
-    model.eval()
-    
-    return model, vqa_dataset, tokenizer
+    return model, vqa_dataset, tokenizer, device
 
-def evaluate_model(model, dataset, tokenizer, device='cuda' if torch.cuda.is_available() else 'cpu'):
-    model = model.to(device)
-    collator = VQACollator(tokenizer, max_length=cfg.VLMConfig.lm_max_length)
-    
+def evaluate_model(model, dataset, tokenizer, device):
     # Metrics
     total_samples = len(dataset)
     correct_predictions = 0
@@ -46,27 +54,31 @@ def evaluate_model(model, dataset, tokenizer, device='cuda' if torch.cuda.is_ava
             sample = dataset[idx]
             
             # Prepare input
-            if hasattr(sample['image'], 'pixel_values'):
-                image = torch.tensor(sample['image'].pixel_values).to(device)
+            image = sample['image']
+            if hasattr(image, 'pixel_values'):
+                image = torch.tensor(image.pixel_values).to(device)
             else:
-                image = torch.tensor(sample['image']).to(device)
+                image = torch.tensor(image).to(device)
             image = image.unsqueeze(0)  # Add batch dimension
             
+            # Prepare text input
             text_data = sample['text_data']
-            answer = sample['answer']
+            encoded = tokenizer.batch_encode_plus([text_data], return_tensors="pt")
+            tokens = encoded["input_ids"].to(device)
             
             # Get model prediction
             outputs = model.generate(
-                image=image,
-                text=text_data,
-                max_length=cfg.VLMConfig.lm_max_length,
+                tokens,
+                image,
+                max_new_tokens=20,  # Same as generate.py default
                 num_beams=1,
                 do_sample=False
             )
             
             # Decode prediction
-            predicted_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            predicted_text = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
             predicted_answer = predicted_text.split("Answer:")[-1].strip()
+            answer = sample['answer']
             
             # Store results
             predictions.append(predicted_answer)
@@ -134,11 +146,11 @@ def main():
     
     # Load model and dataset
     print("Loading model and dataset...")
-    model, dataset, tokenizer = load_model_and_dataset(checkpoint_path, dataset_path)
+    model, dataset, tokenizer, device = load_model_and_dataset(checkpoint_path, dataset_path)
     
     # Run evaluation
     print("Running evaluation...")
-    results = evaluate_model(model, dataset, tokenizer)
+    results = evaluate_model(model, dataset, tokenizer, device)
     
     # Print results
     print_results(results)
