@@ -124,7 +124,7 @@ def print_results(results):
 
 def main():
     # Configuration
-    checkpoint_path = "checkpoints/nanoVLM-sample/model.safetensors"
+    checkpoint_path = "checkpoints/nanoVLM-sample/"
     dataset_path = "playground/sample_dataset"
     
     # Load model and dataset
