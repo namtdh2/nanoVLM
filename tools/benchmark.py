@@ -71,8 +71,6 @@ def evaluate_model(model, dataset, tokenizer, device):
                 tokens,
                 image,
                 max_new_tokens=20,  # Same as generate.py default
-                num_beams=1,
-                do_sample=False
             )
             
             # Decode prediction
