@@ -145,55 +145,20 @@ def get_dataloaders(train_cfg, vlm_cfg):
         worker_init_fn=seed_worker,
         generator=g,
     )
-    
+
     test_loader = DataLoader(
-        val_dataset,
-        batch_size=train_cfg.batch_size,
-        sampler=val_sampler,
-        collate_fn=vqa_collator,
-        num_workers=8,
+        test_dataset, 
+        batch_size=train_cfg.mmstar_batch_size, 
+        shuffle=False, 
+        collate_fn=mmstar_collator,
         pin_memory=True,
-        drop_last=True,
         worker_init_fn=seed_worker,
         generator=g,
-    )
-
-    # test_loader = DataLoader(
-    #     test_dataset, 
-    #     batch_size=train_cfg.mmstar_batch_size, 
-    #     shuffle=False, 
-    #     collate_fn=mmstar_collator,
-    #     pin_memory=True,
-    #     worker_init_fn=seed_worker,
-    #     generator=g,
-    #     )
+        )
 
     return train_loader, val_loader, test_loader
 
 def test_mmstar(model, tokenizer, test_loader, device):
-    total_examples = 0
-    correct_predictions = 0
-    with torch.no_grad():
-        for batch in test_loader:
-            image = batch['images'].to(device)
-            input_ids = batch['input_ids'].to(device)
-            labels = batch['labels'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            
-            correct_answer = tokenizer.batch_decode(labels, skip_special_tokens=True)
-            
-            gen = model.generate(input_ids, image, attention_mask)
-            model_output = tokenizer.batch_decode(gen, skip_special_tokens=True)
-            
-            is_correct = utils.check_multiple_choice_with_regex(model_output, correct_answer)
-            
-            total_examples += len(is_correct)
-            if is_correct:
-                correct_predictions += sum(is_correct)
-    accuracy = correct_predictions / total_examples if total_examples > 0 else 0
-    return accuracy
-
-def test_windoor(model, tokenizer, test_loader, device):
     total_examples = 0
     correct_predictions = 0
     with torch.no_grad():
@@ -294,6 +259,7 @@ def train(train_cfg, vlm_cfg):
 
     epoch_times = []
     best_accuracy = 0
+    best_loss = float('inf')
     global_step = 0
     for epoch in range(train_cfg.epochs):
         epoch_start_time = time.time()
@@ -388,9 +354,11 @@ def train(train_cfg, vlm_cfg):
                     if is_master() and global_step % (train_cfg.eval_interval*2) == 0:
                         eval_model = model.module if is_dist() else model  # unwrap the model for eval if DDP
                         epoch_accuracy = test_mmstar(eval_model, tokenizer, test_loader, device)
-                        if epoch_accuracy > best_accuracy:
+                        if avg_val_loss < best_loss:
+                            best_loss = avg_val_loss
                             best_accuracy = epoch_accuracy
                             eval_model.save_pretrained(save_directory=vlm_cfg.vlm_checkpoint_path)
+                        
                         if train_cfg.log_wandb and is_master():    
                             run.log({"accuracy": epoch_accuracy}, step=global_step)
                         print(f"Step: {global_step}, Loss: {batch_loss:.4f}, Tokens/s: {tokens_per_second:.2f}, Accuracy: {epoch_accuracy:.4f}")
