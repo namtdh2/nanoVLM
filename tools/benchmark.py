@@ -77,8 +77,17 @@ def evaluate_model(model, dataset, tokenizer, device):
             # Decode prediction
             predicted_text = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
             print("predicted_text", predicted_text)
+            
+            # Extract just the answer letter
             predicted_answer = predicted_text.split("Answer:")[-1].strip()
+            # Take only the first character if it's A, B, C, or D
+            if predicted_answer and predicted_answer[0] in ['A', 'B', 'C', 'D']:
+                predicted_answer = predicted_answer[0]
+            else:
+                predicted_answer = ''  # Invalid answer
+            
             answer = sample['answer']
+            print(f"Extracted answer: {predicted_answer}, Original answer: {answer}")
             
             # Store results
             predictions.append(predicted_answer)
