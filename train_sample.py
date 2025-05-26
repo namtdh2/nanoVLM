@@ -59,7 +59,7 @@ class TrainConfig:
     val_ratio: float = 0.2
     compile: bool = False
     data_cutoff_idx: int = 1024  # Use all samples
-    batch_size: int = 2  # Small batch size for sample dataset
+    batch_size: int = 4  # Small batch size for sample dataset
     gradient_accumulation_steps: int = 1
     mmstar_batch_size: int = 2
     max_grad_norm: float = None
