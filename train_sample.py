@@ -68,10 +68,10 @@ class TrainConfig:
     epochs: int = 5
     compile: bool = False
     resume_from_vlm_checkpoint: bool = False
-    train_dataset_path: str = 'HuggingFaceM4/the_cauldron'
-    train_dataset_name: tuple[str, ...] = ("tqa", "vsr")
-    # train_dataset_path: str = 'playground/sample_dataset'
-    # train_dataset_name: tuple[str, ...] = ("default",)  # Use default configuration
+    # train_dataset_path: str = 'HuggingFaceM4/the_cauldron'
+    # train_dataset_name: tuple[str, ...] = ("tqa", "vsr")
+    train_dataset_path: str = 'playground/sample_dataset'
+    train_dataset_name: tuple[str, ...] = ("default",)  # Use default configuration
     test_dataset_path: str = "Lin-Chen/MMStar"
     log_wandb: bool = False  # Disable wandb logging for sample training
 
@@ -85,8 +85,8 @@ def main():
     train_cfg = TrainConfig()
 
     # Verify dataset size
-    # dataset = load_from_disk(train_cfg.train_dataset_path)
-    # print(f"Dataset size: {len(dataset['train'])} samples")
+    dataset = load_from_disk(train_cfg.train_dataset_path)
+    print(f"Dataset size: {len(dataset['train'])} samples")
 
     # Print configurations
     print("--- VLM Config ---")
