@@ -86,8 +86,15 @@ def evaluate_model(model, dataset, tokenizer, device):
             else:
                 predicted_answer = ''  # Invalid answer
             
+            # Extract ground truth answer letter
             answer = sample['answer']
-            print(f"Extracted answer: {predicted_answer}, Original answer: {answer}")
+            if answer.startswith("Answer: "):
+                answer = answer[8:]  # Remove "Answer: "
+            if answer.endswith("<|endoftext|>"):
+                answer = answer[:-13]  # Remove "<|endoftext|>"
+            answer = answer.strip()
+            
+            print(f"Extracted answer: {predicted_answer}, Ground truth answer: {answer}")
             
             # Store results
             predictions.append(predicted_answer)
