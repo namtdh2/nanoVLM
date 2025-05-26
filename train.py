@@ -13,6 +13,7 @@ from datasets import load_dataset, concatenate_datasets
 from torch.utils.data import DataLoader, RandomSampler, DistributedSampler
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel
+from datasets import load_from_disk
 
 torch.manual_seed(0)
 if torch.cuda.is_available():
@@ -79,7 +80,8 @@ def get_dataloaders(train_cfg, vlm_cfg):
     # Load and combine all training datasets
     combined_train_data = []
     for dataset_name in train_cfg.train_dataset_name:
-        train_ds = load_dataset(train_cfg.train_dataset_path, dataset_name)
+        # train_ds = load_dataset(train_cfg.train_dataset_path, dataset_name)
+        train_ds = load_from_disk(train_cfg.train_dataset_path)
         combined_train_data.append(train_ds['train'])
     train_ds = concatenate_datasets(combined_train_data)
     
