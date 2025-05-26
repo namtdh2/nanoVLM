@@ -70,7 +70,7 @@ class TrainConfig:
     resume_from_vlm_checkpoint: bool = False
     # train_dataset_path: str = 'HuggingFaceM4/the_cauldron'
     # train_dataset_name: tuple[str, ...] = ("tqa", "vsr")
-    train_dataset_path: str = 'playground/sample_dataset'
+    train_dataset_path: str = 'playground/windoor_dataset'
     train_dataset_name: tuple[str, ...] = ("default",)  # Use default configuration
     test_dataset_path: str = "Lin-Chen/MMStar"
     log_wandb: bool = False  # Disable wandb logging for sample training

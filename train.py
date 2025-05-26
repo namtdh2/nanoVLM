@@ -416,7 +416,8 @@ def train(train_cfg, vlm_cfg):
         # Save the final model state
         print("Training complete. Saving final model state...")
         final_model = model.module if is_dist() else model  # unwrap the model if DDP
-        final_model.save_pretrained(save_directory=vlm_cfg.vlm_checkpoint_path)
+        last_checkpoint_path = vlm_cfg.vlm_checkpoint_path.replace("checkpoint", "last_checkpoint")
+        final_model.save_pretrained(save_directory=last_checkpoint_path)
         print(f"Final model saved to {vlm_cfg.vlm_checkpoint_path}")
 
 def main():
