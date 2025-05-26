@@ -413,6 +413,12 @@ def train(train_cfg, vlm_cfg):
             run.summary["mmstar_acc"] = best_accuracy
             run.finish()
 
+        # Save the final model state
+        print("Training complete. Saving final model state...")
+        final_model = model.module if is_dist() else model  # unwrap the model if DDP
+        final_model.save_pretrained(save_directory=vlm_cfg.vlm_checkpoint_path)
+        print(f"Final model saved to {vlm_cfg.vlm_checkpoint_path}")
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--lr_mp', type=float, help='Learning rate for the mapping network')
