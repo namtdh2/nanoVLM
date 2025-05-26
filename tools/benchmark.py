@@ -6,6 +6,7 @@ from transformers import AutoTokenizer, AutoImageProcessor
 from tqdm import tqdm
 import numpy as np
 from collections import defaultdict
+from safetensors.torch import load_file
 
 # Add the parent directory to Python path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -27,9 +28,9 @@ def load_model_and_dataset(checkpoint_path, dataset_path):
     # Initialize model
     model = VisionLanguageModel(cfg.VLMConfig())
     
-    # Load checkpoint
-    checkpoint = torch.load(checkpoint_path, map_location='cpu')
-    model.load_state_dict(checkpoint['model_state_dict'])
+    # Load checkpoint from safetensors
+    state_dict = load_file(checkpoint_path)
+    model.load_state_dict(state_dict)
     model.eval()
     
     return model, vqa_dataset, tokenizer
@@ -128,7 +129,7 @@ def print_results(results):
 
 def main():
     # Configuration
-    checkpoint_path = "checkpoints/nanoVLM-sample/model.pt"
+    checkpoint_path = "checkpoints/nanoVLM-sample/model.safetensors"
     dataset_path = "playground/sample_dataset"
     
     # Load model and dataset
