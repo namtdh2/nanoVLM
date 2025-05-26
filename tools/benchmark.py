@@ -46,7 +46,12 @@ def evaluate_model(model, dataset, tokenizer, device='cuda' if torch.cuda.is_ava
             sample = dataset[idx]
             
             # Prepare input
-            image = sample['image'].unsqueeze(0).to(device)
+            if hasattr(sample['image'], 'pixel_values'):
+                image = torch.tensor(sample['image'].pixel_values).to(device)
+            else:
+                image = torch.tensor(sample['image']).to(device)
+            image = image.unsqueeze(0)  # Add batch dimension
+            
             text_data = sample['text_data']
             answer = sample['answer']
             
