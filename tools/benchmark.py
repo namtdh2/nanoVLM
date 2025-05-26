@@ -6,7 +6,6 @@ from transformers import AutoTokenizer, AutoImageProcessor
 from tqdm import tqdm
 import numpy as np
 from collections import defaultdict
-from safetensors.torch import load_file
 
 # Add the parent directory to Python path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -25,12 +24,8 @@ def load_model_and_dataset(checkpoint_path, dataset_path):
     dataset = load_from_disk(dataset_path)
     vqa_dataset = VQADataset(dataset['train'], tokenizer, image_processor)
     
-    # Initialize model
-    model = VisionLanguageModel(cfg.VLMConfig())
-    
-    # Load checkpoint from safetensors
-    state_dict = load_file(checkpoint_path)
-    model.load_state_dict(state_dict)
+    # Initialize and load model using from_pretrained
+    model = VisionLanguageModel.from_pretrained(checkpoint_path)
     model.eval()
     
     return model, vqa_dataset, tokenizer
