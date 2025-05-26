@@ -402,10 +402,10 @@ def train(train_cfg, vlm_cfg):
         print(f"Average time per sample: {avg_time_per_sample:.4f}s")
 
         # Push the best model to the hub (Please set your user name in the config!)
-        if vlm_cfg.hf_repo_name is not None:
-            print("Training complete. Pushing model to Hugging Face Hub...")
-            hf_model = VisionLanguageModel.from_pretrained(vlm_cfg.vlm_checkpoint_path)
-            hf_model.push_to_hub(vlm_cfg.hf_repo_name)
+        # if vlm_cfg.hf_repo_name is not None:
+        #     print("Training complete. Pushing model to Hugging Face Hub...")
+        #     hf_model = VisionLanguageModel.from_pretrained(vlm_cfg.vlm_checkpoint_path)
+        #     hf_model.push_to_hub(vlm_cfg.hf_repo_name)
 
         if train_cfg.log_wandb:
             run.summary["avg_epoch_time"] = avg_epoch_time
