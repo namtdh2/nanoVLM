@@ -75,6 +75,7 @@ def evaluate_model(model, dataset, tokenizer, device):
             
             # Decode prediction
             predicted_text = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
+            print("predicted_text", predicted_text)
             predicted_answer = predicted_text.split("Answer:")[-1].strip()
             answer = sample['answer']
             
