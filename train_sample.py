@@ -65,7 +65,7 @@ class TrainConfig:
     max_grad_norm: float = None
     eval_in_epochs: bool = True
     eval_interval: int = 125
-    epochs: int = 20
+    epochs: int = 25
     compile: bool = False
     resume_from_vlm_checkpoint: bool = False
     # train_dataset_path: str = 'HuggingFaceM4/the_cauldron'
