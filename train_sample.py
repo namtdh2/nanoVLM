@@ -59,13 +59,13 @@ class TrainConfig:
     val_ratio: float = 0.2
     compile: bool = False
     data_cutoff_idx: int = 10000  # Use all samples
-    batch_size: int = 16  # Small batch size for sample dataset
+    batch_size: int = 64  # Small batch size for sample dataset
     gradient_accumulation_steps: int = 1
     mmstar_batch_size: int = 2
     max_grad_norm: float = None
     eval_in_epochs: bool = True
-    eval_interval: int = 250
-    epochs: int = 25
+    eval_interval: int = 125
+    epochs: int = 20
     compile: bool = False
     resume_from_vlm_checkpoint: bool = False
     # train_dataset_path: str = 'HuggingFaceM4/the_cauldron'
